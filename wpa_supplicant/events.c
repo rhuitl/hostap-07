@@ -884,6 +884,12 @@ static void wpa_supplicant_event_scan_results(struct wpa_supplicant *wpa_s,
 	struct wpa_bss *selected;
 	struct wpa_ssid *ssid = NULL;
 	struct wpa_scan_results *scan_res;
+	int ap = 0;
+
+#ifdef CONFIG_AP
+	if (wpa_s->ap_iface)
+		ap = 1;
+#endif /* CONFIG_AP */
 
 	wpa_supplicant_notify_scanning(wpa_s, 0);
 
@@ -891,7 +897,7 @@ static void wpa_supplicant_event_scan_results(struct wpa_supplicant *wpa_s,
 						   data ? &data->scan_info :
 						   NULL, 1);
 	if (scan_res == NULL) {
-		if (wpa_s->conf->ap_scan == 2)
+		if (wpa_s->conf->ap_scan == 2 || ap)
 			return;
 		wpa_printf(MSG_DEBUG, "Failed to get scan results - try "
 			   "scanning again");
@@ -902,6 +908,12 @@ static void wpa_supplicant_event_scan_results(struct wpa_supplicant *wpa_s,
 	if (wpa_s->scan_res_handler) {
 		wpa_s->scan_res_handler(wpa_s, scan_res);
 		wpa_s->scan_res_handler = NULL;
+		wpa_scan_results_free(scan_res);
+		return;
+	}
+
+	if (ap) {
+		wpa_printf(MSG_DEBUG, "Ignore scan results in AP mode");
 		wpa_scan_results_free(scan_res);
 		return;
 	}
