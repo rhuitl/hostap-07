@@ -1172,6 +1172,8 @@ wps_er_init(struct wps_context *wps, const char *ifname)
 		wps_er_deinit(er, NULL, NULL);
 		return NULL;
 	}
+	/* Limit event_id to < 32 bits to avoid issues with atoi() */
+	er->event_id &= 0x0fffffff;
 
 	if (get_netif_info(ifname, &er->ip_addr, &er->ip_addr_text,
 			   er->mac_addr)) {
