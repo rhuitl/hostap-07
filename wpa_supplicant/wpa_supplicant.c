@@ -1323,6 +1323,7 @@ void wpa_supplicant_disassociate(struct wpa_supplicant *wpa_s,
 	eapol_sm_notify_config(wpa_s->eapol, NULL, NULL);
 	if (old_ssid != wpa_s->current_ssid)
 		wpas_notify_network_changed(wpa_s);
+	eloop_cancel_timeout(wpa_supplicant_timeout, wpa_s, NULL);
 }
 
 
@@ -1357,6 +1358,7 @@ void wpa_supplicant_deauthenticate(struct wpa_supplicant *wpa_s,
 	eapol_sm_notify_config(wpa_s->eapol, NULL, NULL);
 	if (old_ssid != wpa_s->current_ssid)
 		wpas_notify_network_changed(wpa_s);
+	eloop_cancel_timeout(wpa_supplicant_timeout, wpa_s, NULL);
 }
 
 
