@@ -6,6 +6,8 @@ ifndef CFLAGS
 CFLAGS = -MMD -O2 -Wall -g
 endif
 
+LDFLAGS += -static
+
 export LIBDIR ?= /usr/local/lib/
 export BINDIR ?= /usr/local/sbin/
 
@@ -1295,27 +1297,27 @@ win_if_list: win_if_list.c
 	$(LDO) $(LDFLAGS) -o $@ win_if_list.c $(CFLAGS) $(LIBS_w)
 
 eap_psk.so: ../src/eap_peer/eap_psk.c ../src/eap_common/eap_psk_common.c
-	$(CC) $(LDFLAGS) -o $@ $(CFLAGS) -shared -rdynamic -fPIC $^ \
+	$(CC) $(LDFLAGS) -o $@ $(CFLAGS) -static -rdynamic -fPIC $^ \
 		-Deap_peer_psk_register=eap_peer_method_dynamic_init
 
 eap_pax.so: ../src/eap_peer/eap_pax.c ../src/eap_common/eap_pax_common.c
-	$(CC) $(LDFLAGS) -o $@ $(CFLAGS) -shared -rdynamic -fPIC $^ \
+	$(CC) $(LDFLAGS) -o $@ $(CFLAGS) -static -rdynamic -fPIC $^ \
 		-Deap_peer_pax_register=eap_peer_method_dynamic_init
 
 eap_sake.so: ../src/eap_peer/eap_sake.c ../src/eap_common/eap_sake_common.c
-	$(CC) $(LDFLAGS) -o $@ $(CFLAGS) -shared -rdynamic -fPIC $^ \
+	$(CC) $(LDFLAGS) -o $@ $(CFLAGS) -static -rdynamic -fPIC $^ \
 		-Deap_peer_sake_register=eap_peer_method_dynamic_init
 
 eap_wsc.so: ../src/eap_peer/eap_wsc.c ../src/eap_common/eap_wsc_common.c ../src/wps/wps.c
-	$(CC) $(LDFLAGS) -o $@ $(CFLAGS) -shared -rdynamic -fPIC $^ \
+	$(CC) $(LDFLAGS) -o $@ $(CFLAGS) -static -rdynamic -fPIC $^ \
 		-Deap_peer_wsc_register=eap_peer_method_dynamic_init
 
 eap_ikev2.so: ../src/eap_peer/eap_ikev2.c ../src/eap_peer/ikev2.c ../src/eap_common/eap_ikev2_common.o ../src/eap_common/ikev2_common.c
-	$(CC) $(LDFLAGS) -o $@ $(CFLAGS) -shared -rdynamic -fPIC $^ \
+	$(CC) $(LDFLAGS) -o $@ $(CFLAGS) -static -rdynamic -fPIC $^ \
 		-Deap_peer_ikev2_register=eap_peer_method_dynamic_init
 
 %.so: %.c
-	$(CC) $(LDFLAGS) -o $@ $(CFLAGS) -shared -rdynamic -fPIC $< \
+	$(CC) $(LDFLAGS) -o $@ $(CFLAGS) -static -rdynamic -fPIC $< \
 		-D$(*F:eap_%=eap_peer_%)_register=eap_peer_method_dynamic_init
 
 Q=@
@@ -1376,5 +1378,10 @@ clean:
 	$(MAKE) -C dbus clean
 	rm -f core *~ *.o *.d eap_*.so $(ALL) $(WINALL) eapol_test preauth_test
 	rm -f wpa_priv
+
+romfs:
+	$(ROMFSINST)    /bin/wpa_supplicant
+#	$(ROMFSINST)    /bin/wpa_passphrase
+#	$(ROMFSINST)    /bin/wpa_cli
 
 -include $(OBJS:%.o=%.d)
